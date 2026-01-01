@@ -24,6 +24,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('customers', \App\Http\Controllers\CustomerController::class)->except(['create', 'edit', 'show']);
     Route::resource('invoices', \App\Http\Controllers\InvoiceController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('/invoices/{invoice}/download', [\App\Http\Controllers\InvoiceController::class, 'download'])->name('invoices.download');
+    Route::post('/invoices/{invoice}/email', [\App\Http\Controllers\InvoiceController::class, 'email'])->name('invoices.email');
+    Route::post('/invoices/{invoice}/mark-paid', [\App\Http\Controllers\InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
 });
 
 Route::get('/i/{token}', [\App\Http\Controllers\InvoiceController::class, 'publicShow'])->name('invoices.public');

@@ -21,7 +21,16 @@ class CustomerController extends Controller
             'address' => 'nullable|string',
         ]);
 
-        auth()->user()->customers()->create($validated);
+        $customer = auth()->user()->customers()->create($validated);
+
+        // Return JSON for AJAX requests
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'customer' => $customer,
+                'message' => 'Customer created successfully.'
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Customer created successfully.');
     }

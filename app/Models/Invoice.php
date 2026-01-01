@@ -26,6 +26,9 @@ class Invoice extends Model
         parent::boot();
 
         static::creating(function ($invoice) {
+            if (empty($invoice->invoice_number)) {
+                $invoice->invoice_number = $invoice->generateInvoiceNumber();
+            }
             $invoice->public_token = (string) \Illuminate\Support\Str::uuid();
         });
     }
@@ -43,6 +46,25 @@ class Invoice extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function generateInvoiceNumber()
+    {
+        // Get all invoice numbers for this user and find the highest number
+        $invoices = self::where('user_id', $this->user_id)->pluck('invoice_number');
+
+        $maxNumber = 0;
+        foreach ($invoices as $invoiceNumber) {
+            if (preg_match('/INV-(\d+)/', $invoiceNumber, $matches)) {
+                $number = (int) $matches[1];
+                if ($number > $maxNumber) {
+                    $maxNumber = $number;
+                }
+            }
+        }
+
+        $nextNumber = $maxNumber + 1;
+        return 'INV-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
     }
 
     public function items()

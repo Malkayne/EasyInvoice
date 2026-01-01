@@ -1,0 +1,116 @@
+/* User Badge - Green and White Animation */
+.user-role-badge {
+    background: linear-gradient(135deg, #10b981 0%, #ffffff 50%, #00ff88 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 2s ease infinite;
+    color: #000000 !important;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 50px;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6), 0 0 40px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
+    border: 2px solid rgba(16, 185, 129, 0.4);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+.user-role-badge::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(135deg, #10b981, #ffffff, #00ff88, #10b981);
+    background-size: 400% 400%;
+    border-radius: 50px;
+    z-index: -1;
+    animation: gradientShift 2s ease infinite;
+    opacity: 0.7;
+    filter: blur(4px);
+}
+
+.user-role-badge:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.8), 0 0 60px rgba(16, 185, 129, 0.5);
+    border-color: rgba(16, 185, 129, 0.7);
+}
+
+/* Mechanic Badge - Green and White Animation */
+.mechanic-role-badge {
+    background: linear-gradient(135deg, #22c55e 0%, #ffffff 50%, #10b981 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 2s ease infinite;
+    color: #000000 !important;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 50px;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.6), 0 0 40px rgba(34, 197, 94, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
+    border: 2px solid rgba(34, 197, 94, 0.4);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+.mechanic-role-badge::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(135deg, #22c55e, #ffffff, #10b981, #22c55e);
+    background-size: 400% 400%;
+    border-radius: 50px;
+    z-index: -1;
+    animation: gradientShift 2s ease infinite;
+    opacity: 0.7;
+    filter: blur(4px);
+}
+
+.mechanic-role-badge:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.8), 0 0 60px rgba(34, 197, 94, 0.5);
+    border-color: rgba(34, 197, 94, 0.7);
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Ensure badges are visible in sidebar */
+.app-brand-link {
+    text-align: center;
+    width: 100%;
+}
+
+.role-badge-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 0.5rem 1rem;
+}
+
+/* Mobile Navbar Badges */
+.navbar .user-role-badge,
+.navbar .mechanic-role-badge {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.65rem;
+}
+

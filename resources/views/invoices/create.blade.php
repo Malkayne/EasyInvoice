@@ -1,216 +1,409 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('New Invoice') }}
-        </h2>
-    </x-slot>
+@extends('layouts.business.app')
 
-    <div class="py-12" 
-         x-data="{
-            items: [{
-                description: '',
-                quantity: 1,
-                unit_price: 0,
-                amount: 0
-            }],
-            taxRate: {{ auth()->user()->businessProfile->tax_rate ?? 0 }},
-            subtotal: 0,
-            taxTotal: 0,
-            grandTotal: 0,
+@section('title', 'New Invoice')
 
-            calculateRow(index) {
-                let qty = parseFloat(this.items[index].quantity) || 0;
-                let price = parseFloat(this.items[index].unit_price) || 0;
-                this.items[index].amount = (qty * price).toFixed(2);
-                this.calculateTotals();
-            },
+@section('content')
+<div class="container-xxl flex-grow-1 container-p-y" id="invoiceForm">
+    <!-- Toast Container -->
+    <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 11000;"></div>
 
-            calculateTotals() {
-                this.subtotal = this.items.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
-                this.taxTotal = this.subtotal * (this.taxRate / 100);
-                this.grandTotal = this.subtotal + this.taxTotal;
-            },
-
-            addItem() {
-                this.items.push({
-                    description: '',
-                    quantity: 1,
-                    unit_price: 0,
-                    amount: 0
-                });
-            },
-
-            removeItem(index) {
-                this.items.splice(index, 1);
-                this.calculateTotals();
-            }
-         }"
-         x-init="calculateTotals()"
-    >
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Create New Invoice</h5>
+        </div>
+        <div class="card-body">
             <form method="POST" action="{{ route('invoices.store') }}">
                 @csrf
-                <input type="hidden" name="tax_rate" :value="taxRate">
+                <input type="hidden" name="tax_rate" id="taxRateHidden">
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <label for="invoice_number" class="form-label">Invoice Number</label>
+                        <input type="text" name="invoice_number_display" value="{{ $nextInvoiceNumber }}" class="form-control" readonly>
+                    </div>
                     
-                    <!-- Left Column: Invoice Details & Items -->
-                    <div class="lg:col-span-2 space-y-6">
-                        <!-- Header Card -->
-                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <x-input-label for="customer_id" value="Customer" />
-                                    <select id="customer_id" name="customer_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                        <option value="" disabled selected>Select Customer</option>
-                                        @foreach($customers as $customer)
-                                            <option value="{{ $customer->id }}">{{ $customer->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <x-input-error :messages="$errors->get('customer_id')" class="mt-2" />
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class="fa-solid fa-user text-gray-400"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-2 text-right">
-                                    <a href="{{ route('customers.index') }}" class="text-xs text-royal-600 hover:text-royal-800 font-medium">+ New Customer</a>
-                                </div>
-                            </div>
-
-                            <!-- Invoice Details -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="date" class="block text-sm font-semibold text-gray-700 mb-1">Invoice Date</label>
-                                    <input type="date" name="date" id="date" value="{{ date('Y-m-d') }}" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-royal-500 focus:border-royal-500 sm:text-sm">
-                                </div>
-                                <div>
-                                    <label for="due_date" class="block text-sm font-semibold text-gray-700 mb-1">Due Date</label>
-                                    <input type="date" name="due_date" id="due_date" value="{{ date('Y-m-d', strtotime('+7 days')) }}" class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-royal-500 focus:border-royal-500 sm:text-sm">
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr class="border-gray-100 mb-8">
-
-                        <!-- Line Items -->
-                        <div class="mb-8">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-bold text-gray-800">Items</h3>
-                                <button type="button" @click="addItem()" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-semibold rounded-md text-royal-700 bg-royal-100 hover:bg-royal-200 transition-colors">
-                                    <i class="fa-solid fa-plus mr-1"></i> Add Item
-                                </button>
-                            </div>
-
-                            <div class="space-y-4">
-                                <template x-for="(item, index) in items" :key="index">
-                                    <div class="flex flex-col md:flex-row gap-4 items-start md:items-center bg-gray-50 p-4 rounded-xl border border-gray-200 relative group">
-                                        <div class="flex-1 w-full">
-                                            <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Description</label>
-                                            <input type="text" x-bind:name="'items[' + index + '][description]'" x-model="item.description" placeholder="Item description" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-royal-500 focus:border-royal-500 sm:text-sm" required>
-                                        </div>
-                                        <div class="w-full md:w-24">
-                                            <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Qty</label>
-                                            <input type="number" x-bind:name="'items[' + index + '][quantity]'" x-model="item.quantity" @input="calculateTotal()" min="1" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-royal-500 focus:border-royal-500 sm:text-sm text-right" required>
-                                        </div>
-                                        <div class="w-full md:w-32">
-                                            <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Price</label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-gray-500 sm:text-sm">{{ auth()->user()->businessProfile->currency ?? '$' }}</span>
-                                                </div>
-                                                <input type="number" x-bind:name="'items[' + index + '][unit_price]'" x-model="item.unit_price" @input="calculateTotal()" min="0" step="0.01" class="block w-full pl-7 border-gray-300 rounded-md shadow-sm focus:ring-royal-500 focus:border-royal-500 sm:text-sm text-right" required>
-                                            </div>
-                                        </div>
-                                        <div class="w-full md:w-24 text-right font-bold text-gray-700 pt-1 md:pt-0">
-                                            <span x-text="formatMoney(item.quantity * item.unit_price)"></span>
-                                        </div>
-                                        <button type="button" @click="removeItem(index)" class="absolute -top-2 -right-2 md:static md:ml-2 text-gray-400 hover:text-red-500 transition-colors p-1 bg-white md:bg-transparent rounded-full border md:border-0 shadow-sm md:shadow-none">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-                                <div class="bg-gray-50 p-4 rounded-xl h-full border border-gray-200">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Notes</label>
-                                    <textarea class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-royal-500 focus:border-royal-500 sm:text-sm" rows="3" placeholder="Additional notes for the customer..."></textarea>
-                                </div>
-                                <div class="bg-royal-50 p-6 rounded-xl border border-royal-100">
-                                    <div class="flex justify-between py-2 text-gray-600">
-                                        <span>Subtotal</span>
-                                        <span class="font-medium" x-text="formatMoney(subtotal)"></span>
-                                    </div>
-                                    <div class="flex justify-between py-2 text-gray-600 items-center">
-                                        <span class="flex items-center">Tax <input type="number" x-model="taxRate" @input="calculateTotal()" class="ml-2 w-16 p-1 text-right text-xs border-gray-300 rounded focus:ring-royal-500 focus:border-royal-500"> %</span>
-                                        <span class="font-medium" x-text="formatMoney(taxAmount)"></span>
-                                    </div>
-                                    <div class="flex justify-between py-2 text-gray-600 items-center">
-                                        <span class="flex items-center">Discount <input type="number" x-model="discount" @input="calculateTotal()" class="ml-2 w-20 p-1 text-right text-xs border-gray-300 rounded focus:ring-royal-500 focus:border-royal-500"></span>
-                                        <span class="font-medium text-red-500">-<span x-text="formatMoney(discount)"></span></span>
-                                    </div>
-                                    <div class="border-t border-royal-200 mt-2 pt-2 flex justify-between items-center text-royal-900 text-lg font-bold">
-                                        <span>Total</span>
-                                        <span x-text="formatMoney(total)"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Submit -->
-                        <div class="flex justify-end pt-6 border-t border-gray-100">
-                            <a href="{{ route('dashboard') }}" class="mr-3 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500">
-                                Cancel
-                            </a>
-                            <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-royal-600 hover:bg-royal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-royal-500 shadow-lg transform transition hover:-translate-y-0.5">
-                                <i class="fa-solid fa-save mr-2"></i> Save Invoice
+                    <div class="col-md-6">
+                        <label for="customer_id" class="form-label">Customer</label>
+                        <div class="d-flex gap-2">
+                            <select id="customer_id" name="customer_id" class="form-select flex-grow-1" required>
+                                <option value="" disabled>Select Customer</option>
+                                @foreach($customers as $customer)
+                                    <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                                @endforeach
+                            </select>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCustomerModal">
+                                <i class="ti ti-plus"></i>
                             </button>
                         </div>
-                    </form>
+                        @error('customer_id') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="date" class="form-label">Invoice Date</label>
+                        <input type="date" name="date" id="date" value="{{ date('Y-m-d') }}" class="form-control" required>
+                    </div>
                 </div>
-            </div>
+                
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <label for="due_date" class="form-label">Due Date</label>
+                        <input type="date" name="due_date" id="due_date" value="{{ date('Y-m-d', strtotime('+7 days')) }}" class="form-control" required>
+                    </div>
+                    
+                    <div class="col-md-9">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea name="notes" id="notes" class="form-control" rows="1" placeholder="Additional notes for the customer..."></textarea>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">Items</h6>
+                    <button type="button" id="addItemBtn" class="btn btn-sm btn-primary">
+                        <i class="ti ti-plus me-1"></i> Add Item
+                    </button>
+                </div>
+
+                <div class="table-responsive mb-4">
+                    <table class="table">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40%;">Description</th>
+                                <th style="width: 15%;">Qty</th>
+                                <th style="width: 20%;">Price</th>
+                                <th style="width: 20%;">Amount</th>
+                                <th style="width: 5%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                            <!-- Items will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Subtotal</span>
+                                            <span class="fw-semibold" id="subtotal">{{ auth()->user()->businessProfile->currency ?? '$' }} 0.00</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2 align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <span class="me-2">Tax Rate</span>
+                                                <input type="number" id="taxRate" class="form-control form-control-sm" style="width: 70px;" step="0.01" value="{{ auth()->user()->businessProfile->tax_rate ?? 0 }}">
+                                                <span class="ms-1">%</span>
+                                            </div>
+                                            <span class="fw-semibold" id="taxTotal">{{ auth()->user()->businessProfile->currency ?? '$' }} 0.00</span>
+                                        </div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="h5 mb-0">Total</span>
+                                            <span class="h5 mb-0 text-primary" id="grandTotal">{{ auth()->user()->businessProfile->currency ?? '$' }} 0.00</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3">
+                                            <a href="{{ route('dashboard') }}" class="btn btn-label-secondary">Cancel</a>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="ti ti-device-floppy me-1"></i> Save Invoice
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <!-- Hidden Fields for Form Submission Logic handled by Alpine but here for structure reference -->
+<!-- Create Customer Modal -->
+<div class="modal fade" id="createCustomerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="createCustomerForm" onsubmit="return false;">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="modal_name" class="form-label">Name <span class="text-danger">*</span></label>
+                            <input type="text" id="modal_name" name="name" class="form-control" placeholder="Company or Person Name" required />
+                            <div class="text-danger small mt-1"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="modal_email" class="form-label">Email</label>
+                            <input type="email" id="modal_email" name="email" class="form-control" placeholder="email@example.com" />
+                            <div class="text-danger small mt-1"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="modal_phone" class="form-label">Phone</label>
+                            <input type="text" id="modal_phone" name="phone" class="form-control" placeholder="+1 (555) 000-0000" />
+                            <div class="text-danger small mt-1"></div>
+                        </div>
+                        <div class="col-12">
+                            <label for="modal_address" class="form-label">Address</label>
+                            <textarea id="modal_address" name="address" class="form-control" rows="3" placeholder="Billing Address"></textarea>
+                            <div class="text-danger small mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-check me-1"></i> Save Customer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-    <script>
-        function invoiceForm() {
-            return {
-                items: [
-                    { description: '', quantity: 1, unit_price: 0 }
-                ],
-                taxRate: {{ auth()->user()->businessProfile->tax_rate ?? 0 }},
-                discount: 0,
-                subtotal: 0,
-                taxAmount: 0,
-                total: 0,
-                currency: '{{ auth()->user()->businessProfile->currency ?? '$' }}',
-
-                addItem() {
-                    this.items.push({ description: '', quantity: 1, unit_price: 0 });
-                },
-                removeItem(index) {
-                    if(this.items.length > 1) {
-                        this.items.splice(index, 1);
-                        this.calculateTotal();
-                    }
-                },
-                calculateTotal() {
-                    this.subtotal = this.items.reduce((sum, item) => {
-                        return sum + (item.quantity * item.unit_price);
-                    }, 0);
-                    
-                    this.taxAmount = this.subtotal * (this.taxRate / 100);
-                    this.total = Math.max(0, this.subtotal + this.taxAmount - this.discount);
-                },
-                formatMoney(amount) {
-                    return this.currency + ' ' + (Number(amount).toFixed(2));
-                },
-                init() {
-                    this.calculateTotal();
-                }
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const currency = '{{ auth()->user()->businessProfile->currency ?? "$" }}';
+    let items = [{
+        description: '',
+        quantity: 1,
+        unit_price: 0,
+        amount: 0
+    }];
+    
+    // Initialize
+    renderItems();
+    calculateTotals();
+    
+    // Event listeners
+    document.getElementById('addItemBtn').addEventListener('click', addItem);
+    document.getElementById('taxRate').addEventListener('input', calculateTotals);
+    document.getElementById('createCustomerForm').addEventListener('submit', createCustomer);
+    
+    // Add form submission validation
+    document.querySelector('form[method="POST"]').addEventListener('submit', function(e) {
+        // Validate that at least one item has valid data
+        let hasValidItem = false;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].description.trim() && 
+                parseFloat(items[i].quantity) > 0 && 
+                parseFloat(items[i].unit_price) >= 0) {
+                hasValidItem = true;
+                break;
             }
         }
-    </script>
-</x-app-layout>
+        
+        if (!hasValidItem) {
+            e.preventDefault();
+            showToast('Please add at least one valid item with description, quantity, and price.', 'danger');
+            return false;
+        }
+        
+        // Ensure tax rate is synced
+        calculateTotals();
+    });
+    
+    function addItem() {
+        items.push({
+            description: '',
+            quantity: 1,
+            unit_price: 0,
+            amount: 0
+        });
+        renderItems();
+    }
+    
+    function removeItem(index) {
+        if (items.length > 1) {
+            items.splice(index, 1);
+            renderItems();
+            calculateTotals();
+        }
+    }
+    
+    function calculateRow(index) {
+        const qty = parseFloat(items[index].quantity) || 0;
+        const price = parseFloat(items[index].unit_price) || 0;
+        items[index].amount = (qty * price).toFixed(2);
+        calculateTotals();
+    }
+    
+    function calculateTotals() {
+        const subtotal = items.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+        const taxTotal = subtotal * (taxRate / 100);
+        const grandTotal = subtotal + taxTotal;
+        
+        // Update display
+        document.getElementById('subtotal').textContent = formatMoney(subtotal);
+        document.getElementById('taxTotal').textContent = formatMoney(taxTotal);
+        document.getElementById('grandTotal').textContent = formatMoney(grandTotal);
+        
+        // Update hidden tax rate field for form submission
+        document.getElementById('taxRateHidden').value = taxRate;
+    }
+    
+    function formatMoney(amount) {
+        return currency + ' ' + Number(amount).toFixed(2);
+    }
+    
+    function renderItems() {
+        const tbody = document.getElementById('itemsTableBody');
+        tbody.innerHTML = '';
+        
+        items.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <input type="text" 
+                           name="items[${index}][description]" 
+                           value="${item.description}"
+                           placeholder="Item description" 
+                           class="form-control form-control-sm" 
+                           required>
+                </td>
+                <td>
+                    <input type="number" 
+                           name="items[${index}][quantity]" 
+                           value="${item.quantity}"
+                           min="1" 
+                           class="form-control form-control-sm text-end" 
+                           required>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">${currency}</span>
+                        <input type="number" 
+                               name="items[${index}][unit_price]" 
+                               value="${item.unit_price}"
+                               min="0" 
+                               step="0.01" 
+                               class="form-control text-end" 
+                               required>
+                    </div>
+                </td>
+                <td class="text-end align-middle fw-bold">
+                    <span>${formatMoney(item.quantity * item.unit_price)}</span>
+                </td>
+                <td class="text-center">
+                    <button type="button" onclick="removeItem(${index})" class="btn btn-sm btn-icon btn-text-danger" ${items.length <= 1 ? 'style="display:none;"' : ''}>
+                        <i class="ti ti-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+            
+            // Add event listeners to the new inputs
+            const qtyInput = row.querySelector(`input[name="items[${index}][quantity]"]`);
+            const priceInput = row.querySelector(`input[name="items[${index}][unit_price]"]`);
+            const descInput = row.querySelector(`input[name="items[${index}][description]"]`);
+            
+            qtyInput.addEventListener('input', () => {
+                items[index].quantity = qtyInput.value;
+                calculateRow(index);
+                updateRowDisplay(index);
+            });
+            
+            priceInput.addEventListener('input', () => {
+                items[index].unit_price = priceInput.value;
+                calculateRow(index);
+                updateRowDisplay(index);
+            });
+            
+            descInput.addEventListener('input', () => {
+                items[index].description = descInput.value;
+            });
+        });
+    }
+    
+    function updateRowDisplay(index) {
+        const rows = document.querySelectorAll('#itemsTableBody tr');
+        const amountSpan = rows[index].querySelector('td:nth-child(4) span');
+        amountSpan.textContent = formatMoney(items[index].quantity * items[index].unit_price);
+    }
+    
+    async function createCustomer(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        
+        try {
+            const response = await fetch('{{ route("customers.store") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Add new customer to the select dropdown
+                const select = document.getElementById('customer_id');
+                const option = document.createElement('option');
+                option.value = data.customer.id;
+                option.textContent = data.customer.name;
+                select.appendChild(option);
+                select.value = data.customer.id;
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('createCustomerModal')).hide();
+                
+                // Reset form
+                form.reset();
+                
+                // Show success message
+                showToast('Customer added successfully!', 'success');
+            } else {
+                // Handle validation errors
+                if (data.errors) {
+                    // Clear previous errors
+                    form.querySelectorAll('.text-danger').forEach(el => el.textContent = '');
+                    
+                    Object.keys(data.errors).forEach(key => {
+                        const input = form.querySelector(`[name="${key}"]`);
+                        if (input) {
+                            const errorElement = input.parentNode.querySelector('.text-danger');
+                            if (errorElement) {
+                                errorElement.textContent = data.errors[key][0];
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error creating customer:', error);
+            showToast('Error creating customer', 'danger');
+        }
+    }
+    
+    function showToast(message, type) {
+        const toastHtml = `
+            <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        const toastContainer = document.getElementById('toastContainer');
+        toastContainer.innerHTML = toastHtml;
+        const toastElement = toastContainer.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    }
+    
+    // Make removeItem globally accessible
+    window.removeItem = removeItem;
+});
+</script>
+@endsection

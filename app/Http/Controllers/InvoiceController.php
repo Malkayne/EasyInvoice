@@ -15,8 +15,9 @@ class InvoiceController extends Controller
     public function create()
     {
         $customers = auth()->user()->customers()->orderBy('name')->get();
-        // Simple auto-increment for invoice number prediction (can be improved)
-        $nextInvoiceNumber = 'INV-' . str_pad(auth()->user()->invoices()->count() + 1, 5, '0', STR_PAD_LEFT);
+        // Generate the next invoice number based on the highest existing number
+        $invoice = new \App\Models\Invoice(['user_id' => auth()->id()]);
+        $nextInvoiceNumber = $invoice->generateInvoiceNumber();
         
         return view('invoices.create', compact('customers', 'nextInvoiceNumber'));
     }
@@ -27,7 +28,6 @@ class InvoiceController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:date',
-            'invoice_number' => 'required|string|unique:invoices,invoice_number',
             'items' => 'required|array|min:1',
             'items.*.description' => 'required|string',
             'items.*.quantity' => 'required|numeric|min:0.01',
@@ -55,7 +55,6 @@ class InvoiceController extends Controller
 
         $invoice = auth()->user()->invoices()->create([
             'customer_id' => $validated['customer_id'],
-            'invoice_number' => $validated['invoice_number'],
             'date' => $validated['date'],
             'due_date' => $validated['due_date'],
             'subtotal' => $subtotal,
@@ -105,5 +104,59 @@ class InvoiceController extends Controller
     {
         $invoice = \App\Models\Invoice::where('public_token', $token)->with('user.businessProfile', 'customer', 'items')->firstOrFail();
         return view('invoices.public', compact('invoice'));
+    }
+
+    public function email(\App\Models\Invoice $invoice, Request $request)
+    {
+        if ($invoice->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'recipient_email' => 'required|email',
+            'subject' => 'required|string',
+            'message' => 'required|string',
+            'attach_pdf' => 'boolean',
+        ]);
+
+        try {
+            // Generate PDF if attachment is requested
+            $pdfPath = null;
+            if ($request->boolean('attach_pdf')) {
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('invoices.pdf', compact('invoice'));
+                $pdfPath = storage_path('app/temp/invoice_' . $invoice->invoice_number . '.pdf');
+                $pdf->save($pdfPath);
+            }
+
+            // Send email
+            \Mail::to($validated['recipient_email'])->send(new \App\Mail\InvoiceMail($invoice, $validated['subject'], $validated['message'], $pdfPath));
+
+            // Update invoice status to 'sent'
+            if ($invoice->status === 'draft') {
+                $invoice->update(['status' => 'sent']);
+            }
+
+            // Clean up temporary PDF
+            if ($pdfPath && file_exists($pdfPath)) {
+                unlink($pdfPath);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Invoice sent successfully!']);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to send invoice: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to send invoice. Please try again.']);
+        }
+    }
+
+    public function markAsPaid(\App\Models\Invoice $invoice, Request $request)
+    {
+        if ($invoice->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $invoice->update(['status' => 'paid']);
+
+        return response()->json(['success' => true, 'message' => 'Invoice marked as paid!']);
     }
 }
