@@ -1,100 +1,139 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light-style" dir="ltr" data-theme="theme-default" data-assets-path="{{ asset('assets') }}/">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
         <title>{{ config('app.name', 'EasyInvoice') }} - Professional Invoicing Made Simple</title>
         
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <meta name="description" content="Create and manage invoices for your business with ease." />
+        
+        <!-- Favicon -->
+        <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/logo.png') }}" />
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+
+        <!-- Icons -->
+        <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/fontawesome.css') }}" />
+        <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/tabler-icons.css') }}" />
+
+        <!-- Core CSS -->
+        <link rel="stylesheet" href="{{ asset('assets/vendor/css/rtl/core.css') }}" class="template-customizer-core-css" />
+        <link rel="stylesheet" href="{{ asset('assets/vendor/css/rtl/theme-default.css') }}" class="template-customizer-theme-css" />
+        <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
+
+        <!-- Vendors CSS -->
+        <link rel="stylesheet" href="{{ asset('assets/vendor/libs/node-waves/node-waves.css') }}" />
+
+        <!-- Page CSS -->
+        <link rel="stylesheet" href="{{ asset('assets/custom/theme-overrides.css') }}" />
+
+        <!-- Helpers -->
+        <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
+        <script src="{{ asset('assets/js/config.js') }}"></script>
+
+        <style>
+            .hero-gradient {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            .feature-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            }
+            .feature-card {
+                transition: all 0.3s ease;
+            }
+            .badge-pulse {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
+        </style>
     </head>
-    <body class="antialiased font-sans bg-gray-50 text-gray-900">
+    <body>
         
         <!-- Navigation -->
-        <nav class="fixed w-full z-50 transition-all duration-300 bg-white/90 backdrop-blur-md border-b border-gray-100">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-20">
-                    <!-- Logo -->
-                    <div class="flex-shrink-0 flex items-center gap-3">
-                        <div class="w-10 h-10 bg-royal-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-royal-500/30">
-                            <i class="fa-solid fa-file-invoice-dollar text-xl"></i>
-                        </div>
-                        <span class="font-bold text-2xl tracking-tight text-gray-900">Easy<span class="text-royal-600">Invoice</span></span>
-                    </div>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top shadow-sm">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <span class="d-flex align-items-center justify-content-center bg-primary text-white rounded" style="width: 40px; height: 40px;">
+                        <i class="ti ti-file-invoice fs-4"></i>
+                    </span>
+                    <span class="ms-2 fw-bold fs-4">Easy<span class="text-primary">Invoice</span></span>
+                </a>
 
-                    <!-- Desktop Menu -->
-                    <div class="hidden md:flex items-center space-x-8">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
                         @if (Route::has('login'))
                             @auth
-                                <a href="{{ url('/dashboard') }}" class="text-sm font-semibold text-gray-700 hover:text-royal-600 transition-colors">Dashboard</a>
+                                <li class="nav-item">
+                                    <a href="{{ url('/dashboard') }}" class="nav-link fw-semibold">Dashboard</a>
+                                </li>
                             @else
-                                <a href="{{ route('login') }}" class="text-sm font-semibold text-gray-700 hover:text-royal-600 transition-colors">Log in</a>
+                                <li class="nav-item">
+                                    <a href="{{ route('login') }}" class="nav-link fw-semibold">Log in</a>
+                                </li>
                                 @if (Route::has('register'))
-                                    <a href="{{ route('register') }}" class="px-5 py-2.5 bg-royal-600 text-white text-sm font-semibold rounded-lg hover:bg-royal-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Get Started</a>
+                                    <li class="nav-item ms-2">
+                                        <a href="{{ route('register') }}" class="btn btn-primary">Get Started</a>
+                                    </li>
                                 @endif
                             @endauth
                         @endif
-                    </div>
+                    </ul>
                 </div>
             </div>
         </nav>
 
         <!-- Hero Section -->
-        <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-            <!-- Background Decoration -->
-            <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-                <div class="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-royal-50 rounded-full blur-3xl opacity-50"></div>
-                <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-[600px] h-[600px] bg-blue-50 rounded-full blur-3xl opacity-50"></div>
-            </div>
-
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                <div class="inline-flex items-center px-4 py-2 rounded-full bg-royal-50 border border-royal-100 text-royal-700 text-sm font-medium mb-8 animate-fade-in-up">
-                    <span class="flex h-2 w-2 rounded-full bg-royal-600 mr-2"></span>
-                    Now available 100% Free
-                </div>
-                
-                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-8 leading-tight">
-                    Invoicing made <br class="hidden md:block" />
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-royal-600 to-blue-500">beautifully simple</span>
-                </h1>
-                
-                <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600 mb-10 leading-relaxed">
-                    Create professional invoices in seconds, manage customers, and get paid faster. Designed for freelancers and small businesses who value their time.
-                </p>
-                
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('register') }}" class="px-8 py-4 bg-royal-600 text-white text-lg font-bold rounded-xl hover:bg-royal-700 transition-all shadow-xl shadow-royal-500/30 transform hover:-translate-y-1 flex items-center justify-center">
-                        Start Invoicing Now <i class="fa-solid fa-arrow-right ml-2"></i>
-                    </a>
-                    <a href="#features" class="px-8 py-4 bg-white text-gray-700 border border-gray-200 text-lg font-bold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center">
-                        Learn More
-                    </a>
-                </div>
-
-                <!-- Hero Image Placeholder/Preview -->
-                <div class="mt-20 relative mx-auto max-w-5xl">
-                    <div class="bg-gray-900 rounded-2xl p-2 shadow-2xl ring-1 ring-gray-900/10">
-                        <div class="bg-gray-800 rounded-t-xl h-6 flex items-center px-4 space-x-2 mb-[-1px]">
-                            <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-                            <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+        <section class="hero-gradient text-white" style="padding-top: 120px; padding-bottom: 80px; margin-top: 56px;">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-12 text-center">
+                        <div class="mb-4">
+                            <span class="badge bg-white text-primary px-3 py-2 rounded-pill">
+                                <span class="badge-pulse me-2">●</span>
+                                Now available 100% Free
+                            </span>
                         </div>
-                        <img src="/dashboard-preview.png" onerror="this.src='https://placehold.co/1200x800/1e293b/ffffff?text=EasyInvoice+Dashboard+Preview'" alt="App Screenshot" class="rounded-b-xl w-full h-auto border-t border-gray-700 opacity-90 hover:opacity-100 transition-opacity">
-                    </div>
-                    <!-- Floating Badge -->
-                    <div class="absolute -bottom-10 -right-10 bg-white p-6 rounded-2xl shadow-xl border border-gray-100 hidden md:block animate-bounce-slow">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                                <i class="fa-solid fa-check text-xl"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Invoice Paid</p>
-                                <p class="text-xl font-bold text-gray-900">$1,250.00</p>
+                        
+                        <h1 class="display-2 fw-bold mb-4">
+                            Invoicing made<br />
+                            <span class="text-warning">beautifully simple</span>
+                        </h1>
+                        
+                        <p class="lead mb-5 mx-auto" style="max-width: 700px; opacity: 0.95;">
+                            Create professional invoices in seconds, manage customers, and get paid faster. Designed for freelancers and small businesses who value their time.
+                        </p>
+                        
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a href="{{ route('register') }}" class="btn btn-warning btn-lg px-5 py-3 fw-bold shadow">
+                                Start Invoicing Now <i class="ti ti-arrow-right ms-2"></i>
+                            </a>
+                            <a href="#features" class="btn btn-outline-light btn-lg px-5 py-3 fw-bold">
+                                Learn More
+                            </a>
+                        </div>
+
+                        <!-- Hero Image -->
+                        <div class="mt-5 position-relative">
+                            <div class="card border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                                <div class="card-header bg-dark py-2 px-3">
+                                    <div class="d-flex gap-1">
+                                        <span class="rounded-circle bg-danger" style="width: 12px; height: 12px;"></span>
+                                        <span class="rounded-circle bg-warning" style="width: 12px; height: 12px;"></span>
+                                        <span class="rounded-circle bg-success" style="width: 12px; height: 12px;"></span>
+                                    </div>
+                                </div>
+                                <img src="/dashboard-preview.png" onerror="this.src='https://placehold.co/1200x800/696cff/ffffff?text=EasyInvoice+Dashboard+Preview'" alt="App Screenshot" class="card-img-bottom" style="opacity: 0.95;">
                             </div>
                         </div>
                     </div>
@@ -103,104 +142,141 @@
         </section>
 
         <!-- Features Section -->
-        <section id="features" class="py-24 bg-white relative">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-3xl mx-auto mb-20">
-                    <h2 class="text-royal-600 font-semibold tracking-wide uppercase text-sm mb-3">Why EasyInvoice?</h2>
-                    <h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Everything you need to run your business</h3>
-                    <p class="text-lg text-gray-600">Stop wrestling with spreadsheets. We provide the tools you need to look professional and stay organized.</p>
+        <section id="features" class="py-5 bg-light">
+            <div class="container py-5">
+                <div class="text-center mb-5">
+                    <h6 class="text-primary fw-bold text-uppercase mb-2">Why EasyInvoice?</h6>
+                    <h2 class="display-5 fw-bold mb-3">Everything you need to run your business</h2>
+                    <p class="lead text-muted mx-auto" style="max-width: 700px;">
+                        Stop wrestling with spreadsheets. We provide the tools you need to look professional and stay organized.
+                    </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div class="row g-4">
                     <!-- Feature 1 -->
-                    <div class="group p-8 rounded-3xl bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 hover:shadow-xl transition-all duration-300">
-                        <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <div class="col-md-4">
+                        <div class="card border-0 h-100 feature-card shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded mb-4" style="width: 64px; height: 64px;">
+                                    <i class="ti ti-wand fs-1"></i>
+                                </div>
+                                <h4 class="fw-bold mb-3">Smart Invoice Builder</h4>
+                                <p class="text-muted mb-0">Create beautiful invoices in seconds. Auto-calculations for taxes and discounts mean zero math errors.</p>
+                            </div>
                         </div>
-                        <h4 class="text-xl font-bold text-gray-900 mb-3">Smart Invoice Builder</h4>
-                        <p class="text-gray-600 leading-relaxed">Create beautiful invoices in seconds. Auto-calculations for taxes and discounts mean zero math errors.</p>
                     </div>
 
                     <!-- Feature 2 -->
-                    <div class="group p-8 rounded-3xl bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 hover:shadow-xl transition-all duration-300">
-                        <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-address-book"></i>
+                    <div class="col-md-4">
+                        <div class="card border-0 h-100 feature-card shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded mb-4" style="width: 64px; height: 64px;">
+                                    <i class="ti ti-address-book fs-1"></i>
+                                </div>
+                                <h4 class="fw-bold mb-3">Client Management</h4>
+                                <p class="text-muted mb-0">Keep all your client details in one place. One-click reuse for recurring invoices.</p>
+                            </div>
                         </div>
-                        <h4 class="text-xl font-bold text-gray-900 mb-3">Client Management</h4>
-                        <p class="text-gray-600 leading-relaxed">Keep all your client details in one place. One-click reuse for recurring invoices.</p>
                     </div>
 
                     <!-- Feature 3 -->
-                    <div class="group p-8 rounded-3xl bg-gray-50 hover:bg-white border border-transparent hover:border-gray-100 hover:shadow-xl transition-all duration-300">
-                        <div class="w-14 h-14 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-file-pdf"></i>
+                    <div class="col-md-4">
+                        <div class="card border-0 h-100 feature-card shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded mb-4" style="width: 64px; height: 64px;">
+                                    <i class="ti ti-file-type-pdf fs-1"></i>
+                                </div>
+                                <h4 class="fw-bold mb-3">Instant PDF & Sharing</h4>
+                                <p class="text-muted mb-0">Download professional PDFs or share a secure public link with your clients instantly.</p>
+                            </div>
                         </div>
-                        <h4 class="text-xl font-bold text-gray-900 mb-3">Instant PDF & Sharing</h4>
-                        <p class="text-gray-600 leading-relaxed">Download professional PDFs or share a secure public link with your clients instantly.</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- CTA Section -->
-        <section class="py-20">
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-royal-900 rounded-3xl p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
-                    <!-- Decor -->
-                    <div class="absolute top-0 right-0 -mr-10 -mt-10 w-64 h-64 bg-royal-700 rounded-full opacity-20 blur-3xl"></div>
-                    <div class="absolute bottom-0 left-0 -ml-10 -mb-10 w-64 h-64 bg-blue-600 rounded-full opacity-20 blur-3xl"></div>
-
-                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-6 relative z-10">Ready to streamline your billing?</h2>
-                    <p class="text-royal-200 text-xl mb-10 max-w-2xl mx-auto relative z-10">Join thousands of freelancers who trust EasyInvoice. No credit card required.</p>
-                    
-                    <a href="{{ route('register') }}" class="inline-flex items-center px-8 py-4 bg-white text-royal-900 text-lg font-bold rounded-xl hover:bg-royal-50 transition-all shadow-lg transform hover:-translate-y-1 relative z-10">
-                        Get Started for Free
-                    </a>
+        <section class="py-5">
+            <div class="container py-5">
+                <div class="card border-0 shadow-lg hero-gradient text-white" style="border-radius: 20px; overflow: hidden;">
+                    <div class="card-body text-center p-5">
+                        <h2 class="display-4 fw-bold mb-4">Ready to streamline your billing?</h2>
+                        <p class="lead mb-4 mx-auto" style="max-width: 700px; opacity: 0.95;">
+                            Join thousands of freelancers who trust EasyInvoice. No credit card required.
+                        </p>
+                        
+                        <a href="{{ route('register') }}" class="btn btn-warning btn-lg px-5 py-3 fw-bold shadow">
+                            Get Started for Free
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Footer -->
-        <footer class="bg-white border-t border-gray-100 pt-16 pb-8">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                    <div class="col-span-1 md:col-span-1">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-8 h-8 bg-royal-600 rounded-lg flex items-center justify-center text-white">
-                                <i class="fa-solid fa-file-invoice-dollar"></i>
-                            </div>
-                            <span class="font-bold text-xl text-gray-900">EasyInvoice</span>
+        <footer class="bg-white border-top py-5">
+            <div class="container">
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="d-flex align-items-center justify-content-center bg-primary text-white rounded" style="width: 32px; height: 32px;">
+                                <i class="ti ti-file-invoice"></i>
+                            </span>
+                            <span class="ms-2 fw-bold fs-5">EasyInvoice</span>
                         </div>
-                        <p class="text-gray-500 text-sm">
-                            Simplifying business for freelancers world wide.
+                        <p class="text-muted small">
+                            Simplifying business for freelancers worldwide.
                         </p>
                     </div>
-                    <div>
-                        <h5 class="font-bold text-gray-900 mb-4">Product</h5>
-                        <ul class="space-y-2 text-sm text-gray-600">
-                            <li><a href="#" class="hover:text-royal-600">Features</a></li>
-                            <li><a href="#" class="hover:text-royal-600">Pricing</a></li>
-                            <li><a href="#" class="hover:text-royal-600">Updates</a></li>
+                    <div class="col-lg-2 col-md-4">
+                        <h6 class="fw-bold mb-3">Product</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#features" class="text-muted text-decoration-none small">Features</a></li>
+                            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Pricing</a></li>
+                            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Updates</a></li>
                         </ul>
                     </div>
-                    <div>
-                        <h5 class="font-bold text-gray-900 mb-4">Company</h5>
-                        <ul class="space-y-2 text-sm text-gray-600">
-                            <li><a href="#" class="hover:text-royal-600">About</a></li>
-                            <li><a href="#" class="hover:text-royal-600">Contact</a></li>
-                            <li><a href="#" class="hover:text-royal-600">Privacy</a></li>
+                    <div class="col-lg-2 col-md-4">
+                        <h6 class="fw-bold mb-3">Company</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">About</a></li>
+                            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Contact</a></li>
+                            <li class="mb-2"><a href="#" class="text-muted text-decoration-none small">Privacy</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center">
-                    <p class="text-sm text-gray-500">&copy; {{ date('Y') }} EasyInvoice. All rights reserved.</p>
-                    <div class="flex space-x-6 mt-4 md:mt-0">
-                        <a href="#" class="text-gray-400 hover:text-royal-600"><i class="fa-brands fa-twitter text-xl"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-royal-600"><i class="fa-brands fa-github text-xl"></i></a>
+                <div class="border-top pt-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                            <p class="text-muted small mb-0">&copy; {{ date('Y') }} EasyInvoice. All rights reserved.</p>
+                        </div>
+                        <div class="col-md-6 text-center text-md-end">
+                            <a href="#" class="text-muted me-3"><i class="ti ti-brand-twitter fs-5"></i></a>
+                            <a href="#" class="text-muted"><i class="ti ti-brand-github fs-5"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
         </footer>
 
+        <!-- Core JS -->
+        <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
+        <script src="{{ asset('assets/vendor/libs/popper/popper.js') }}"></script>
+        <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
+        <script src="{{ asset('assets/vendor/libs/node-waves/node-waves.js') }}"></script>
+        <script src="{{ asset('assets/js/main.js') }}"></script>
+
+        <script>
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+        </script>
     </body>
 </html>

@@ -47,7 +47,7 @@
             </div>
 
             <!-- Invoice Details -->
-            <div class="grid grid-cols-2 gap-4 mb-8 bg-gray-50 p-4 rounded-lg">
+            <div class="grid grid-cols-2 gap-4 mb-4 bg-gray-50 p-4 rounded-lg">
                 <div>
                     <span class="block text-xs font-bold text-gray-500 uppercase">Invoice Number</span>
                     <span class="block text-gray-900 font-medium">#{{ $invoice->invoice_number }}</span>
@@ -57,6 +57,13 @@
                     <span class="block text-gray-900 font-medium">{{ $invoice->due_date->format('M d, Y') }}</span>
                 </div>
             </div>
+
+            @if($invoice->note)
+                <div class="mb-8 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+                    <span class="block text-xs font-bold text-blue-500 uppercase mb-1">Note</span>
+                    <div class="text-gray-700 text-sm whitespace-pre-line">{{ $invoice->note }}</div>
+                </div>
+            @endif
 
             <!-- Items -->
             <div class="overflow-x-auto mb-8">

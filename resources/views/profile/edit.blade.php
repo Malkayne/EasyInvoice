@@ -66,6 +66,89 @@
             </div>
         </div>
 
+        <!-- Business Profile Settings -->
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-1">Business Profile</h5>
+                    <p class="text-muted small mb-0">Manage your business information and invoice defaults.</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ route('business-profile.update') }}" enctype="multipart/form-data">
+                        @csrf
+                        @method('patch')
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="business_name" class="form-label">Business Name <span class="text-danger">*</span></label>
+                                <input type="text" id="business_name" name="name" class="form-control" value="{{ old('name', $user->businessProfile->name ?? '') }}" required>
+                                @error('name') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="business_email" class="form-label">Business Email</label>
+                                <input type="email" id="business_email" name="email" class="form-control" value="{{ old('email', $user->businessProfile->email ?? '') }}">
+                                @error('email') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="business_phone" class="form-label">Business Phone</label>
+                                <input type="text" id="business_phone" name="phone" class="form-control" value="{{ old('phone', $user->businessProfile->phone ?? '') }}" placeholder="+1 (555) 000-0000">
+                                @error('phone') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="business_logo" class="form-label">Business Logo</label>
+                                <input type="file" id="business_logo" name="logo" class="form-control" accept="image/*">
+                                @error('logo') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                @if($user->businessProfile && $user->businessProfile->logo)
+                                    <div class="mt-2">
+                                        <img src="{{ asset('storage/' . $user->businessProfile->logo) }}" alt="Current Logo" class="img-thumbnail" style="max-height: 60px;">
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="col-12">
+                                <label for="business_address" class="form-label">Business Address <span class="text-danger">*</span></label>
+                                <textarea id="business_address" name="address" class="form-control" rows="3" required>{{ old('address', $user->businessProfile->address ?? '') }}</textarea>
+                                @error('address') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="currency" class="form-label">Currency <span class="text-danger">*</span></label>
+                                <select id="currency" name="currency" class="form-select" required>
+                                    <option value="$" {{ old('currency', $user->businessProfile->currency ?? '$') == '$' ? 'selected' : '' }}>$ - US Dollar</option>
+                                    <option value="€" {{ old('currency', $user->businessProfile->currency ?? '') == '€' ? 'selected' : '' }}>€ - Euro</option>
+                                    <option value="£" {{ old('currency', $user->businessProfile->currency ?? '') == '£' ? 'selected' : '' }}>£ - British Pound</option>
+                                    <option value="¥" {{ old('currency', $user->businessProfile->currency ?? '') == '¥' ? 'selected' : '' }}>¥ - Japanese Yen</option>
+                                    <option value="₹" {{ old('currency', $user->businessProfile->currency ?? '') == '₹' ? 'selected' : '' }}>₹ - Indian Rupee</option>
+                                    <option value="₦" {{ old('currency', $user->businessProfile->currency ?? '') == '₦' ? 'selected' : '' }}>₦ - Nigerian Naira</option>
+                                </select>
+                                @error('currency') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="tax_rate" class="form-label">Default Tax Rate (%)</label>
+                                <input type="number" id="tax_rate" name="tax_rate" class="form-control" value="{{ old('tax_rate', $user->businessProfile->tax_rate ?? 0) }}" min="0" max="100" step="0.01">
+                                @error('tax_rate') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                <small class="text-muted">This will be used as the default tax rate for new invoices.</small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3 mt-4">
+                            <button type="submit" class="btn btn-primary">Save Business Profile</button>
+
+                            @if (session('status') === 'business-profile-updated')
+                                <span x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)" class="text-success small">
+                                    Saved.
+                                </span>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- Update Password -->
         <div class="col-12 mb-4">
             <div class="card">

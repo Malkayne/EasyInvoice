@@ -25,6 +25,12 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
+
+    <!-- Home -->
+    <li class="menu-header small text-uppercase">
+        <span class="menu-header-text">Home</span>
+    </li>
+
     <!-- Dashboard -->
     <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
         <a href="{{ route('dashboard') }}" class="menu-link">

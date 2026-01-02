@@ -51,8 +51,8 @@
                     </div>
                     
                     <div class="col-md-9">
-                        <label for="notes" class="form-label">Notes</label>
-                        <textarea name="notes" id="notes" class="form-control" rows="1" placeholder="Additional notes for the customer..."></textarea>
+                        <label for="note" class="form-label">Note</label>
+                        <textarea name="note" id="note" class="form-control" rows="1" placeholder="Additional note for the invoice..."></textarea>
                     </div>
                 </div>
 
@@ -69,11 +69,11 @@
                     <table class="table">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 40%;">Description</th>
-                                <th style="width: 15%;">Qty</th>
-                                <th style="width: 20%;">Price</th>
-                                <th style="width: 20%;">Amount</th>
-                                <th style="width: 5%;"></th>
+                                <th style="width: 40%; min-width: 250px;">Description</th>
+                                <th style="width: 15%; min-width: 100px;">Qty</th>
+                                <th style="width: 20%; min-width: 200px;">Price</th>
+                                <th style="width: 20%; min-width: 150px; text-align: right;">Amount</th>
+                                <th style="width: 5%; text-align: center;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="itemsTableBody">

@@ -33,6 +33,7 @@ class InvoiceController extends Controller
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
             'tax_rate' => 'nullable|numeric|min:0', // Passed from UI for calculation verification
+            'note' => 'nullable|string|max:5000',
         ]);
 
         $subtotal = 0;
@@ -61,6 +62,7 @@ class InvoiceController extends Controller
             'tax_total' => $taxTotal,
             'total' => $total,
             'status' => 'draft',
+            'note' => $request->input('note'),
         ]);
 
         $invoice->items()->createMany($itemsData);
@@ -116,7 +118,7 @@ class InvoiceController extends Controller
             'recipient_email' => 'required|email',
             'subject' => 'required|string',
             'message' => 'required|string',
-            'attach_pdf' => 'boolean',
+            'attach_pdf' => 'nullable|boolean',
         ]);
 
         try {

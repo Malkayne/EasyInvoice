@@ -19,8 +19,9 @@
                         <th class="fw-bold">Number</th>
                         <th class="fw-bold">Customer</th>
                         <th class="fw-bold">Date</th>
-                        <th class="fw-bold">Due Date</th>
+                        <th class="fw-bold text-nowrap">Due Date</th>
                         <th class="fw-bold">Total</th>
+                        <th class="fw-bold">Note</th>
                         <th class="fw-bold">Status</th>
                         <th class="fw-bold text-end">Actions</th>
                     </tr>
@@ -28,23 +29,27 @@
                 <tbody class="table-border-bottom-0">
                     @forelse($invoices as $invoice)
                     <tr>
-                        <td>
+                        <td class="text-nowrap">
                             <a href="{{ route('invoices.show', $invoice) }}" class="fw-bold text-primary">
                                 #{{ $invoice->invoice_number }}
                             </a>
                         </td>
-                        <td>
+                        <td class="text-nowrap">
                             <div class="d-flex align-items-center">
-                                <span class="avatar-initial rounded-circle bg-label-secondary me-2 p-1 text-xs">
-                                    {{ substr($invoice->customer->name, 0, 1) }}
-                                </span>
-                                <span>{{ $invoice->customer->name }}</span>
+                                <div class="avatar avatar-sm me-2">
+                                    <span class="avatar-initial rounded-circle bg-label-secondary">{{ substr($invoice->customer->name, 0, 1) }}</span>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <span class="fw-medium">{{ $invoice->customer->name }}</span><br>
+                                    <span class="text-primary fs-6">{{ $invoice->customer->email }}</span>
+                                </div>
                             </div>
                         </td>
-                        <td>{{ $invoice->date->format('M d, Y') }}</td>
-                        <td>{{ $invoice->due_date->format('M d, Y') }}</td>
-                        <td class="fw-bold">{{ auth()->user()->businessProfile->currency }} {{ number_format($invoice->total, 2) }}</td>
-                        <td>
+                        <td class="text-nowrap">{{ $invoice->date->format('M d, Y') }}</td>
+                        <td class="text-nowrap">{{ $invoice->due_date->format('M d, Y') }}</td>
+                        <td class="fw-bold text-end text-nowrap">{{ auth()->user()->businessProfile->currency }} {{ number_format($invoice->total, 2) }}</td>
+                        <td class="small text-nowrap text-truncate" style="max-width: 150px;" title="{{ $invoice->note }}">{{ \Illuminate\Support\Str::limit($invoice->note, 30, '...') }}</td>
+                        <td class="text-nowrap text-center">
                             @if($invoice->status === 'paid')
                                 <span class="badge bg-label-success">Paid</span>
                             @elseif($invoice->status === 'sent')
@@ -71,7 +76,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center p-5">
+                        <td colspan="8" class="text-center p-5">
                             <div class="d-flex flex-column align-items-center justify-content-center">
                                 <div class="avatar avatar-xl rounded bg-label-secondary mb-3">
                                     <i class="ti ti-file-off fs-1"></i>

@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BusinessProfileController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +22,7 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/business/setup', [BusinessProfileController::class, 'create'])->name('business.setup');
     Route::post('/business/setup', [BusinessProfileController::class, 'store'])->name('business.store');
+    Route::patch('/profile/business', [BusinessProfileController::class, 'update'])->name('business-profile.update');
     
     Route::resource('customers', \App\Http\Controllers\CustomerController::class)->except(['create', 'edit', 'show']);
     Route::resource('invoices', \App\Http\Controllers\InvoiceController::class)->only(['index', 'create', 'store', 'show']);

@@ -70,16 +70,16 @@
                                          class="invoice-logo me-3">
                                 @endif
                                 <div>
-                                    <h1 class="mb-1 fw-bold">INVOICE</h1>
+                                    <h1 class="mb-1 fw-bold text-white">INVOICE</h1>
                                     <p class="mb-0 opacity-75">#{{ $invoice->invoice_number }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6 text-md-end">
-                            <span class="invoice-status 
+                            <span class="invoice-status  align-items-center d-inline-flex
                                 {{ $invoice->status === 'paid' ? 'bg-success text-white' : 
                                    ($invoice->status === 'sent' ? 'bg-info text-white' : 'bg-secondary text-white') }}">
-                                <i class="ti ti-circle-filled me-1"></i>
+                                <i class="ti ti-circle me-1"></i>
                                 {{ ucfirst($invoice->status) }}
                             </span>
                         </div>
@@ -140,10 +140,10 @@
                             </div>
                         </div>
                         <div class="col-md-6 text-md-end">
-                            @if($invoice->notes)
+                            @if($invoice->note)
                                 <div>
-                                    <small class="text-muted text-uppercase d-block">Notes</small>
-                                    <span class="text-muted">{{ $invoice->notes }}</span>
+                                    <small class="text-muted text-uppercase d-block">Note</small>
+                                    <span class="text-muted">{{ $invoice->note }}</span>
                                 </div>
                             @endif
                         </div>
@@ -163,10 +163,10 @@
                             <tbody>
                                 @foreach($invoice->items as $item)
                                 <tr>
-                                    <td class="fw-medium">{{ $item->description }}</td>
-                                    <td class="text-end">{{ number_format($item->quantity, 2) }}</td>
-                                    <td class="text-end invoice-amount">{{ auth()->user()->businessProfile->currency }} {{ number_format($item->unit_price, 2) }}</td>
-                                    <td class="text-end fw-bold invoice-amount">{{ auth()->user()->businessProfile->currency }} {{ number_format($item->amount, 2) }}</td>
+                                    <td class="fw-medium text-nowrap" style="word-break: break-word; max-width: 200px;">{{ $item->description }}</td>
+                                    <td class="text-end text-nowrap">{{ number_format($item->quantity, 2) }}</td>
+                                    <td class="text-end text-nowrap invoice-amount">{{ auth()->user()->businessProfile->currency }} {{ number_format($item->unit_price, 2) }}</td>
+                                    <td class="text-end fw-bold text-nowrap invoice-amount">{{ auth()->user()->businessProfile->currency }} {{ number_format($item->amount, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -278,7 +278,7 @@ Best regards,
                     </div>
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="attach_pdf" name="attach_pdf" checked>
+                            <input class="form-check-input" type="checkbox" id="attach_pdf" name="attach_pdf" value="1" checked>
                             <label class="form-check-label" for="attach_pdf">
                                 Attach PDF to email
                             </label>

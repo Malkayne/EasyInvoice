@@ -19,6 +19,7 @@ class Invoice extends Model
         'total',
         'status',
         'public_token',
+        'note',
     ];
 
     protected static function boot()
