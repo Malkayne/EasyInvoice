@@ -281,7 +281,7 @@
             </div>
             <div class="detail-item">
                 <span class="detail-label">Amount Due</span>
-                <span class="detail-value">{{ $invoice->user->businessProfile->currency }} {{ number_format($invoice->total, 2) }}</span>
+                <span class="detail-value">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->total, 2) }}</span>
             </div>
         </div>
 
@@ -300,8 +300,8 @@
                 <tr>
                     <td class="description">{{ $item->description }}</td>
                     <td class="text-right">{{ number_format($item->quantity, 2) }}</td>
-                    <td class="text-right">{{ $invoice->user->businessProfile->currency }} {{ number_format($item->unit_price, 2) }}</td>
-                    <td class="text-right">{{ $invoice->user->businessProfile->currency }} {{ number_format($item->amount, 2) }}</td>
+                    <td class="text-right">{{ currency_symbol($invoice->currency) }} {{ number_format($item->unit_price, 2) }}</td>
+                    <td class="text-right">{{ currency_symbol($invoice->currency) }} {{ number_format($item->amount, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -312,17 +312,17 @@
             <div class="totals-box">
                 <div class="total-row">
                     <span class="total-label">Subtotal</span>
-                    <span class="total-value">{{ $invoice->user->businessProfile->currency }} {{ number_format($invoice->subtotal, 2) }}</span>
+                    <span class="total-value">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->subtotal, 2) }}</span>
                 </div>
                 @if($invoice->tax_total > 0)
                 <div class="total-row">
                     <span class="total-label">Tax</span>
-                    <span class="total-value">{{ $invoice->user->businessProfile->currency }} {{ number_format($invoice->tax_total, 2) }}</span>
+                    <span class="total-value">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->tax_total, 2) }}</span>
                 </div>
                 @endif
                 <div class="total-row">
                     <span class="total-label">Total</span>
-                    <span class="total-value">{{ $invoice->user->businessProfile->currency }} {{ number_format($invoice->total, 2) }}</span>
+                    <span class="total-value">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->total, 2) }}</span>
                 </div>
             </div>
         </div>

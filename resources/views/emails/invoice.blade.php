@@ -185,7 +185,7 @@
                     </div>
                 </div>
                 <div class="total-amount">
-                    Total: {{ $invoice->user->businessProfile->currency }} {{ number_format($invoice->total, 2) }}
+                    <span class="h5 mb-0 text-primary fw-bold">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->total, 2) }}</span>
                 </div>
             </div>
 

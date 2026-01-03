@@ -62,14 +62,14 @@
                 {{-- <a class="dropdown-item" href="{{ route('user.profile') }}"> --}}
                 <a class="dropdown-item" href="/profile">
                     <i class="ti ti-user-check me-2 ti-sm"></i>
-                    <span class="align-middle">{{ __('dashboard.profile') }}</span>
+                    <span class="align-middle">Profile</span>
                 </a>
             </li>
             <li><div class="dropdown-divider"></div></li>
             <li>
                 <a href="javascript:void(0);" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
                     <i class="ti ti-logout me-2 ti-sm"></i>
-                    <span class="align-middle">{{ __('common.logout') }}</span>
+                    <span class="align-middle">Logout</span>
                 </a>
             </li>
         </ul>

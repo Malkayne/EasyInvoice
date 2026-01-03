@@ -59,6 +59,14 @@
         </a>
     </li>
 
+    <!-- Analytics -->
+    <li class="menu-item {{ request()->routeIs('analytics.*') ? 'active' : '' }}">
+        <a href="{{ route('analytics.index') }}" class="menu-link">
+            <i class="menu-icon tf-icons ti ti-chart-bar"></i>
+            <div>Analytics</div>
+        </a>
+    </li>
+
     <!-- Settings -->
     <li class="menu-header small text-uppercase">
         <span class="menu-header-text">Settings</span>
@@ -73,13 +81,10 @@
 
     <!-- Logout -->
     <li class="menu-item">
-        <form method="POST" action="{{ route('logout') }}" id="logout-form">
-            @csrf
-            <a href="javascript:void(0);" class="menu-link text-danger" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <i class="menu-icon tf-icons ti ti-logout"></i>
-                <div>Logout</div>
-            </a>
-        </form>
+        <a href="javascript:void(0);" class="menu-link text-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
+            <i class="menu-icon tf-icons ti ti-logout"></i>
+            <div>Logout</div>
+        </a>
     </li>
     </ul>
 </aside>

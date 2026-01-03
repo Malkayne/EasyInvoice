@@ -92,7 +92,7 @@
                                             <span class="avatar-initial rounded-circle bg-label-primary">{{ substr($customer->name, 0, 1) }}</span>
                                         </div>
                                         <div>
-                                            <span class="fw-medium">{{ $customer->name }}</span>
+                                            <a href="{{ route('customers.show', $customer) }}" class="fw-medium text-primary text-decoration-none">{{ $customer->name }}</a>
                                             @if($customer->address)
                                                 <small class="text-muted d-block">{{ \Illuminate\Support\Str::limit($customer->address, 50) }}</small>
                                             @endif
@@ -128,6 +128,9 @@
                                             <i class="ti ti-dots-vertical"></i>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end">
+                                            <a href="{{ route('customers.show', $customer) }}" class="dropdown-item">
+                                                <i class="ti ti-eye me-1"></i> View
+                                            </a>
                                             <a href="{{ route('invoices.create') }}?customer={{ $customer->id }}" class="dropdown-item">
                                                 <i class="ti ti-file-invoice me-1"></i> Create Invoice
                                             </a>

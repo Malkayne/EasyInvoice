@@ -117,12 +117,11 @@
                             <div class="col-md-6">
                                 <label for="currency" class="form-label">Currency <span class="text-danger">*</span></label>
                                 <select id="currency" name="currency" class="form-select" required>
-                                    <option value="$" {{ old('currency', $user->businessProfile->currency ?? '$') == '$' ? 'selected' : '' }}>$ - US Dollar</option>
-                                    <option value="€" {{ old('currency', $user->businessProfile->currency ?? '') == '€' ? 'selected' : '' }}>€ - Euro</option>
-                                    <option value="£" {{ old('currency', $user->businessProfile->currency ?? '') == '£' ? 'selected' : '' }}>£ - British Pound</option>
-                                    <option value="¥" {{ old('currency', $user->businessProfile->currency ?? '') == '¥' ? 'selected' : '' }}>¥ - Japanese Yen</option>
-                                    <option value="₹" {{ old('currency', $user->businessProfile->currency ?? '') == '₹' ? 'selected' : '' }}>₹ - Indian Rupee</option>
-                                    <option value="₦" {{ old('currency', $user->businessProfile->currency ?? '') == '₦' ? 'selected' : '' }}>₦ - Nigerian Naira</option>
+                                    @foreach(get_all_currencies() as $code => $data)
+                                        <option value="{{ $code }}" {{ old('currency', $user->businessProfile->currency ?? 'USD') == $code ? 'selected="selected"' : '' }}>
+                                            {{ $data['name'] }} ({{ $data['symbol'] }})
+                                        </option>
+                                    @endforeach
                                 </select>
                                 @error('currency') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                             </div>

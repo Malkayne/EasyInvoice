@@ -81,8 +81,8 @@
                         <tr>
                             <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item->description }}</td>
                             <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-500">{{ $item->quantity }}</td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-500">{{ number_format($item->unit_price, 2) }}</td>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">{{ number_format($item->amount, 2) }}</td>
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-500">{{ currency_symbol($invoice->currency) }} {{ number_format($item->unit_price, 2) }}</td>
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">{{ currency_symbol($invoice->currency) }} {{ number_format($item->amount, 2) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -94,15 +94,15 @@
                 <div class="w-64 space-y-2">
                     <div class="flex justify-between text-sm text-gray-600">
                         <span>Subtotal</span>
-                        <span>{{ number_format($invoice->subtotal, 2) }}</span>
+                        <span>{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->subtotal, 2) }}</span>
                     </div>
                     <div class="flex justify-between text-sm text-gray-600">
                         <span>Tax</span>
-                        <span>{{ number_format($invoice->tax_total, 2) }}</span>
+                        <span>{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->tax_total, 2) }}</span>
                     </div>
                     <div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t">
                         <span>Total</span>
-                        <span>{{ $invoice->user->businessProfile->currency }} {{ number_format($invoice->total, 2) }}</span>
+                        <span>{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->total, 2) }}</span>
                     </div>
                 </div>
             </div>

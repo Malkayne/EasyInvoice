@@ -19,7 +19,14 @@ class InvoiceController extends Controller
         $invoice = new \App\Models\Invoice(['user_id' => auth()->id()]);
         $nextInvoiceNumber = $invoice->generateInvoiceNumber();
         
-        return view('invoices.create', compact('customers', 'nextInvoiceNumber'));
+        // Get preselected customer from query parameter
+        $preselectedCustomer = null;
+        if (request()->has('customer')) {
+            $customerId = request()->get('customer');
+            $preselectedCustomer = auth()->user()->customers()->find($customerId);
+        }
+        
+        return view('invoices.create', compact('customers', 'nextInvoiceNumber', 'preselectedCustomer'));
     }
 
     public function store(Request $request)
@@ -28,6 +35,7 @@ class InvoiceController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:date',
+            'currency' => 'required|string|size:3',
             'items' => 'required|array|min:1',
             'items.*.description' => 'required|string',
             'items.*.quantity' => 'required|numeric|min:0.01',
@@ -63,6 +71,7 @@ class InvoiceController extends Controller
             'total' => $total,
             'status' => 'draft',
             'note' => $request->input('note'),
+            'currency' => $validated['currency'],
         ]);
 
         $invoice->items()->createMany($itemsData);
@@ -77,6 +86,79 @@ class InvoiceController extends Controller
         }
         $invoice->load('customer', 'items');
         return view('invoices.show', compact('invoice'));
+    }
+
+    public function edit(\App\Models\Invoice $invoice)
+    {
+        if ($invoice->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        $customers = auth()->user()->customers()->orderBy('name')->get();
+        $invoice->load('customer', 'items');
+        
+        return view('invoices.edit', compact('invoice', 'customers'));
+    }
+
+    public function update(Request $request, \App\Models\Invoice $invoice)
+    {
+        if ($invoice->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'date' => 'required|date',
+            'due_date' => 'required|date|after_or_equal:date',
+            'currency' => 'required|string|size:3',
+            'items' => 'required|array|min:1',
+            'items.*.description' => 'required|string',
+            'items.*.quantity' => 'required|numeric|min:0.01',
+            'items.*.unit_price' => 'required|numeric|min:0',
+            'tax_rate' => 'nullable|numeric|min:0',
+            'note' => 'nullable|string|max:5000',
+        ]);
+
+        $subtotal = 0;
+        $itemsData = [];
+
+        foreach ($request->items as $item) {
+            $quantity = floatval($item['quantity']);
+            $unitPrice = floatval($item['unit_price']);
+            $amount = $quantity * $unitPrice;
+            $subtotal += $amount;
+
+            $itemsData[] = [
+                'description' => $item['description'],
+                'quantity' => $quantity,
+                'unit_price' => $unitPrice,
+                'amount' => $amount,
+            ];
+        }
+
+        $taxRate = floatval($request->tax_rate ?? 0);
+        $taxTotal = $subtotal * ($taxRate / 100);
+        $total = $subtotal + $taxTotal;
+
+        // Update invoice
+        $invoice->update([
+            'customer_id' => $validated['customer_id'],
+            'date' => $validated['date'],
+            'due_date' => $validated['due_date'],
+            'currency' => $validated['currency'],
+            'subtotal' => $subtotal,
+            'tax_total' => $taxTotal,
+            'total' => $total,
+            'note' => $validated['note'] ?? null,
+        ]);
+
+        // Delete existing items and create new ones
+        $invoice->items()->delete();
+        foreach ($itemsData as $itemData) {
+            $invoice->items()->create($itemData);
+        }
+
+        return redirect()->route('invoices.show', $invoice)->with('success', 'Invoice updated successfully!');
     }
 
     public function download(\App\Models\Invoice $invoice)

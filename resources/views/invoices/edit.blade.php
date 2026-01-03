@@ -1,6 +1,6 @@
 @extends('layouts.business.app')
 
-@section('title', 'New Invoice')
+@section('title', 'Edit Invoice')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y" id="invoiceForm">
@@ -8,18 +8,24 @@
     <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 11000;"></div>
 
     <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Create New Invoice</h5>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Edit Invoice #{{ $invoice->invoice_number }}</h5>
+            <div class="d-flex gap-2">
+                <a href="{{ route('invoices.show', $invoice) }}" class="btn btn-label-secondary">
+                    <i class="ti ti-arrow-left me-1"></i> Back
+                </a>
+            </div>
         </div>
         <div class="card-body">
-            <form method="POST" action="{{ route('invoices.store') }}">
+            <form method="POST" action="{{ route('invoices.update', $invoice) }}">
                 @csrf
+                @method('PATCH')
                 <input type="hidden" name="tax_rate" id="taxRateHidden">
 
                 <div class="row g-4 mb-4">
                     <div class="col-md-3">
                         <label for="invoice_number" class="form-label">Invoice Number</label>
-                        <input type="text" name="invoice_number_display" value="{{ $nextInvoiceNumber }}" class="form-control" readonly>
+                        <input type="text" name="invoice_number_display" value="{{ $invoice->invoice_number }}" class="form-control" readonly>
                     </div>
                     
                     <div class="col-md-6">
@@ -28,7 +34,7 @@
                             <select id="customer_id" name="customer_id" class="form-select flex-grow-1" required>
                                 <option value="" disabled>Select Customer</option>
                                 @foreach($customers as $customer)
-                                    <option value="{{ $customer->id }}" {{ $preselectedCustomer && $preselectedCustomer->id == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
+                                    <option value="{{ $customer->id }}" {{ $invoice->customer_id == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
                                 @endforeach
                             </select>
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCustomerModal">
@@ -40,19 +46,19 @@
 
                     <div class="col-md-3">
                         <label for="date" class="form-label">Invoice Date</label>
-                        <input type="date" name="date" id="date" value="{{ date('Y-m-d') }}" class="form-control" required>
+                        <input type="date" name="date" id="date" value="{{ $invoice->date->format('Y-m-d') }}" class="form-control" required>
                     </div>
                 </div>
                 
                 <div class="row g-4 mb-4">
                     <div class="col-md-3">
                         <label for="due_date" class="form-label">Due Date</label>
-                        <input type="date" name="due_date" id="due_date" value="{{ date('Y-m-d', strtotime('+7 days')) }}" class="form-control" required>
+                        <input type="date" name="due_date" id="due_date" value="{{ $invoice->due_date->format('Y-m-d') }}" class="form-control" required>
                     </div>
                     
                     <div class="col-md-9">
                         <label for="note" class="form-label">Note</label>
-                        <textarea name="note" id="note" class="form-control" rows="1" placeholder="Additional note for the invoice..."></textarea>
+                        <textarea name="note" id="note" class="form-control" rows="1" placeholder="Additional note for the invoice...">{{ $invoice->note ?? '' }}</textarea>
                     </div>
                 </div>
 
@@ -65,7 +71,7 @@
                             <label class="form-label me-2 mb-0">Currency:</label>
                             <select id="invoiceCurrency" name="currency" class="form-select form-select-sm" style="width: auto;" required>
                                 @foreach(get_all_currencies() as $code => $data)
-                                    <option value="{{ $code }}" {{ (auth()->user()->businessProfile->currency ?? 'USD') == $code ? 'selected="selected"' : '' }}>
+                                    <option value="{{ $code }}" {{ $invoice->currency == $code ? 'selected="selected"' : '' }}>
                                         {{ $data['name'] }} ({{ $data['symbol'] }})
                                     </option>
                                 @endforeach
@@ -102,27 +108,27 @@
                                     <div class="col-md-8">
                                         <div class="d-flex justify-content-between mb-2">
                                             <span>Subtotal</span>
-                                            <span class="fw-semibold" id="subtotal">{{ currency_symbol(auth()->user()->businessProfile->currency ?? 'USD') }} 0.00</span>
+                                            <span class="fw-semibold" id="subtotal">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->subtotal, 2) }}</span>
                                         </div>
                                         <div class="d-flex justify-content-between mb-2 align-items-center">
                                             <div class="d-flex align-items-center">
                                                 <span class="me-2">Tax Rate</span>
-                                                <input type="number" id="taxRate" class="form-control form-control-sm" style="width: 70px;" step="0.01" value="{{ auth()->user()->businessProfile->tax_rate ?? 0 }}">
+                                                <input type="number" id="taxRate" class="form-control form-control-sm" style="width: 70px;" step="0.01" value="{{ $invoice->tax_total > 0 && $invoice->subtotal > 0 ? ($invoice->tax_total / $invoice->subtotal) * 100 : 0 }}">
                                                 <span class="ms-1">%</span>
                                             </div>
-                                            <span class="fw-semibold" id="taxTotal">{{ currency_symbol(auth()->user()->businessProfile->currency ?? 'USD') }} 0.00</span>
+                                            <span class="fw-semibold" id="taxTotal">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->tax_total, 2) }}</span>
                                         </div>
                                         <hr>
                                         <div class="d-flex justify-content-between">
                                             <span class="h5 mb-0">Total</span>
-                                            <span class="h5 mb-0 text-primary" id="grandTotal">{{ currency_symbol(auth()->user()->businessProfile->currency ?? 'USD') }} 0.00</span>
+                                            <span class="h5 mb-0 text-primary" id="grandTotal">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->total, 2) }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="d-flex justify-content-end gap-2 mt-4 pt-3">
-                                            <a href="{{ route('dashboard') }}" class="btn btn-label-secondary">Cancel</a>
+                                            <a href="{{ route('invoices.show', $invoice) }}" class="btn btn-label-secondary">Cancel</a>
                                             <button type="submit" class="btn btn-primary">
-                                                <i class="ti ti-device-floppy me-1"></i> Save Invoice
+                                                <i class="ti ti-device-floppy me-1"></i> Update Invoice
                                             </button>
                                         </div>
                                     </div>
@@ -144,36 +150,35 @@
                 <h5 class="modal-title">Add New Customer</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="createCustomerForm" onsubmit="return false;">
+            <form id="createCustomerForm" method="POST" action="{{ route('customers.store') }}">
+                @csrf
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-12">
-                            <label for="modal_name" class="form-label">Name <span class="text-danger">*</span></label>
-                            <input type="text" id="modal_name" name="name" class="form-control" placeholder="Company or Person Name" required />
-                            <div class="text-danger small mt-1"></div>
+                            <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                            <input type="text" id="name" name="name" class="form-control" placeholder="Company or Person Name" value="{{ old('name') }}" required />
+                            @error('name') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-6">
-                            <label for="modal_email" class="form-label">Email</label>
-                            <input type="email" id="modal_email" name="email" class="form-control" placeholder="email@example.com" />
-                            <div class="text-danger small mt-1"></div>
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" id="email" name="email" class="form-control" placeholder="email@example.com" value="{{ old('email') }}" />
+                            @error('email') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-6">
-                            <label for="modal_phone" class="form-label">Phone</label>
-                            <input type="text" id="modal_phone" name="phone" class="form-control" placeholder="+1 (555) 000-0000" />
-                            <div class="text-danger small mt-1"></div>
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="text" id="phone" name="phone" class="form-control" placeholder="+1 (555) 000-0000" value="{{ old('phone') }}" />
+                            @error('phone') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-12">
-                            <label for="modal_address" class="form-label">Address</label>
-                            <textarea id="modal_address" name="address" class="form-control" rows="3" placeholder="Billing Address"></textarea>
-                            <div class="text-danger small mt-1"></div>
+                            <label for="address" class="form-label">Address</label>
+                            <textarea id="address" name="address" class="form-control" rows="3" placeholder="Billing Address">{{ old('address') }}</textarea>
+                            @error('address') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="ti ti-check me-1"></i> Save Customer
-                    </button>
+                    <button type="submit" class="btn btn-primary">Save Customer</button>
                 </div>
             </form>
         </div>
@@ -182,7 +187,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let currency = '{{ auth()->user()->businessProfile->currency ?? "USD" }}';
+    let currency = '{{ $invoice->currency }}';
     const currencySelect = document.getElementById('invoiceCurrency');
     
     // Set initial currency selector value
@@ -245,12 +250,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    let items = [{
-        description: '',
-        quantity: 1,
-        unit_price: 0,
-        amount: 0
-    }];
+    // Load existing items
+    let items = @json($invoice->items->map(function($item) {
+        return [
+            'description' => $item->description,
+            'quantity' => $item->quantity,
+            'unit_price' => $item->unit_price,
+            'amount' => $item->amount
+        ];
+    }));
     
     // Initialize
     renderItems();
@@ -508,9 +516,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const toast = new bootstrap.Toast(toastElement);
         toast.show();
     }
-    
-    // Make removeItem globally accessible
-    window.removeItem = removeItem;
 });
 </script>
 @endsection

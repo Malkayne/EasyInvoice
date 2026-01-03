@@ -90,7 +90,7 @@
                     <!-- Business & Customer Info -->
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <div class="border rounded p-3 bg-light">
+                            <div class="border rounded p-3" style="background-color: #f8f9fa;">
                                 <h6 class="text-muted text-uppercase small fw-bold mb-3">From</h6>
                                 <h5 class="fw-bold mb-2">{{ auth()->user()->businessProfile->name }}</h5>
                                 <div class="text-muted">
@@ -107,7 +107,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="border rounded p-3 bg-light">
+                            <div class="border rounded p-3" style="background-color: #f8f9fa;">
                                 <h6 class="text-muted text-uppercase small fw-bold mb-3">Bill To</h6>
                                 <h5 class="fw-bold mb-2">{{ $invoice->customer->name }}</h5>
                                 <div class="text-muted">
@@ -156,8 +156,8 @@
                                 <tr>
                                     <th>Description</th>
                                     <th class="text-end" style="width: 100px;">Quantity</th>
-                                    <th class="text-end" style="width: 120px;">Unit Price</th>
-                                    <th class="text-end" style="width: 120px;">Amount</th>
+                                    <th class="text-end text-nowrap" style="width: 120px;">Unit Price</th>
+                                    <th class="text-end text-nowrap" style="width: 120px;">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -165,8 +165,8 @@
                                 <tr>
                                     <td class="fw-medium text-nowrap" style="word-break: break-word; max-width: 200px;">{{ $item->description }}</td>
                                     <td class="text-end text-nowrap">{{ number_format($item->quantity, 2) }}</td>
-                                    <td class="text-end text-nowrap invoice-amount">{{ auth()->user()->businessProfile->currency }} {{ number_format($item->unit_price, 2) }}</td>
-                                    <td class="text-end fw-bold text-nowrap invoice-amount">{{ auth()->user()->businessProfile->currency }} {{ number_format($item->amount, 2) }}</td>
+                                    <td class="text-end text-nowrap invoice-amount">{{ currency_symbol($invoice->currency) }} {{ number_format($item->unit_price, 2) }}</td>
+                                    <td class="text-end fw-bold text-nowrap invoice-amount">{{ currency_symbol($invoice->currency) }} {{ number_format($item->amount, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -181,17 +181,17 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">Subtotal</span>
-                                        <span class="fw-semibold invoice-amount">{{ auth()->user()->businessProfile->currency }} {{ number_format($invoice->subtotal, 2) }}</span>
+                                        <span class="fw-semibold invoice-amount">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->subtotal, 2) }}</span>
                                     </div>
                                     @if($invoice->tax_total > 0)
                                     <div class="d-flex justify-content-between mb-3">
                                         <span class="text-muted">Tax</span>
-                                        <span class="fw-semibold invoice-amount">{{ auth()->user()->businessProfile->currency }} {{ number_format($invoice->tax_total, 2) }}</span>
+                                        <span class="fw-semibold invoice-amount">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->tax_total, 2) }}</span>
                                     </div>
                                     @endif
                                     <div class="d-flex justify-content-between pt-3 border-top">
                                         <span class="h5 mb-0 fw-bold">Total</span>
-                                        <span class="h5 mb-0 text-primary fw-bold invoice-amount">{{ auth()->user()->businessProfile->currency }} {{ number_format($invoice->total, 2) }}</span>
+                                        <span class="h5 mb-0 text-primary fw-bold invoice-amount">{{ currency_symbol($invoice->currency) }} {{ number_format($invoice->total, 2) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -218,7 +218,7 @@
                             <i class="ti ti-link me-2"></i> Copy Public Link
                         </button>
                         @if($invoice->status !== 'paid')
-                        <button type="button" class="btn btn-success" onclick="markAsPaid()">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#markPaidModal">
                             <i class="ti ti-check me-2"></i> Mark as Paid
                         </button>
                         @endif
@@ -265,7 +265,7 @@
                         <label for="message" class="form-label">Message</label>
                         <textarea class="form-control" id="message" name="message" rows="4" required>Dear {{ $invoice->customer->name }},
 
-Please find attached invoice #{{ $invoice->invoice_number }} for {{ auth()->user()->businessProfile->currency }} {{ number_format($invoice->total, 2) }}.
+Please find attached invoice #{{ $invoice->invoice_number }} for {{ currency_symbol($invoice->currency) }} {{ number_format($invoice->total, 2) }}.
 
 The invoice is due on {{ $invoice->due_date->format('M d, Y') }}.
 
@@ -296,6 +296,39 @@ Best regards,
     </div>
 </div>
 
+<!-- Mark as Paid Confirmation Modal -->
+<div class="modal fade" id="markPaidModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mark Invoice as Paid</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="d-flex justify-content-center mb-3">
+                        <div class="avatar avatar-xl rounded-circle bg-label-success">
+                            <i class="ti ti-check fs-1 text-center"></i>
+                        </div>
+                    </div>
+                    <h4 class="mb-1">Confirm Payment</h4>
+                    <p class="text-muted">Are you sure you want to mark invoice #{{ $invoice->invoice_number }} as paid?</p>
+                    <div class="alert alert-info text-center">
+                        <i class="ti ti-info-circle me-2"></i>
+                        This will update the invoice status to "Paid" and cannot be undone.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="confirmMarkAsPaid()">
+                    <i class="ti ti-check me-1"></i> Mark as Paid
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function copyPublicLink() {
     const publicLink = '{{ route('invoices.public', $invoice->public_token) }}';
@@ -306,28 +339,27 @@ function copyPublicLink() {
     });
 }
 
-function markAsPaid() {
-    if (confirm('Are you sure you want to mark this invoice as paid?')) {
-        fetch('{{ route('invoices.mark-paid', $invoice) }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast('Invoice marked as paid!', 'success');
-                setTimeout(() => window.location.reload(), 1500);
-            } else {
-                showToast('Failed to update invoice status', 'danger');
-            }
-        })
-        .catch(() => {
-            showToast('Error updating invoice', 'danger');
-        });
-    }
+function confirmMarkAsPaid() {
+    fetch('{{ route('invoices.mark-paid', $invoice) }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('markPaidModal')).hide();
+            showToast('Invoice marked as paid!', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showToast('Failed to update invoice status', 'danger');
+        }
+    })
+    .catch(() => {
+        showToast('Error updating invoice', 'danger');
+    });
 }
 
 function showToast(message, type) {

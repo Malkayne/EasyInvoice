@@ -8,8 +8,24 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        $customers = auth()->user()->customers()->latest()->get();
+        $customers = auth()->user()->customers()
+            ->withCount('invoices')
+            ->latest()
+            ->paginate(10);
         return view('customers.index', compact('customers'));
+    }
+
+    public function show(\App\Models\Customer $customer)
+    {
+        if ($customer->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        $customer->load(['invoices' => function($query) {
+            $query->latest();
+        }]);
+        
+        return view('customers.show', compact('customer'));
     }
 
     public function store(Request $request)

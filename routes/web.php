@@ -24,11 +24,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/business/setup', [BusinessProfileController::class, 'store'])->name('business.store');
     Route::patch('/profile/business', [BusinessProfileController::class, 'update'])->name('business-profile.update');
     
-    Route::resource('customers', \App\Http\Controllers\CustomerController::class)->except(['create', 'edit', 'show']);
-    Route::resource('invoices', \App\Http\Controllers\InvoiceController::class)->only(['index', 'create', 'store', 'show']);
+    Route::resource('customers', \App\Http\Controllers\CustomerController::class)->except(['create', 'edit']);
+    Route::resource('invoices', \App\Http\Controllers\InvoiceController::class);
     Route::get('/invoices/{invoice}/download', [\App\Http\Controllers\InvoiceController::class, 'download'])->name('invoices.download');
     Route::post('/invoices/{invoice}/email', [\App\Http\Controllers\InvoiceController::class, 'email'])->name('invoices.email');
     Route::post('/invoices/{invoice}/mark-paid', [\App\Http\Controllers\InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
+    
+    // Analytics routes
+    Route::get('/analytics', [\App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');
 });
 
 Route::get('/i/{token}', [\App\Http\Controllers\InvoiceController::class, 'publicShow'])->name('invoices.public');
